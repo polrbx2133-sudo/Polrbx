@@ -28,4 +28,6 @@ DB_USER=${DB_USER:-}
 DB_PASS=${DB_PASS:-}
 EOF
 
+echo "error_reporting = E_ALL & ~E_DEPRECATED & ~E_NOTICE" > /usr/local/etc/php/conf.d/99-deprecated.ini
+
 apache2-foreground
