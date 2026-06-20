@@ -16,6 +16,7 @@ APP_DEBUG=${APP_DEBUG:-false}
 ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
 Domain=${Domain:-}
 CookieName=${CookieName:-}
+COOKIE_NAME=${CookieName:-}
 R2_BUCKET=${R2_BUCKET:-}
 R2_ACCOUNT_ID=${R2_ACCOUNT_ID:-}
 R2_KEY_ID=${R2_KEY_ID:-}
