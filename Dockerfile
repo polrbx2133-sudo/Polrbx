@@ -48,4 +48,4 @@ RUN sed -ri 's/:80>/:${PORT:-80}>/g' /etc/apache2/sites-available/000-default.co
 
 EXPOSE 80
 
-CMD ["sh", "-c", "apache2-foreground"]
+CMD ["bash", "-lc", "set -eux; a2dismod mpm_event mpm_worker || true; rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* || true; a2enmod mpm_prefork; apache2-foreground"]
