@@ -42,10 +42,16 @@ RUN { \
 # Uprawnienia dla storage/cache (jeśli projekt tego potrzebuje, jak Laravel-style apps)
 RUN chown -R www-data:www-data /var/www/html/storage 2>/dev/null || true
 
-# Railway wymaga, aby aplikacja słuchała na porcie z $PORT
-RUN sed -ri 's/Listen 80/Listen ${PORT:-80}/g' /etc/apache2/ports.conf
-RUN sed -ri 's/:80>/:${PORT:-80}>/g' /etc/apache2/sites-available/000-default.conf
+# UWAGA: NIE podstawiamy $PORT tutaj (w RUN) — zmienna $PORT
+# istnieje tylko w środowisku Railway w trakcie RUNTIME, nie podczas build.
+# Podstawienie portu robimy w CMD poniżej.
 
 EXPOSE 80
 
-CMD ["bash", "-lc", "set -eux; a2dismod mpm_event mpm_worker || true; rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* || true; a2enmod mpm_prefork; apache2-foreground"]
+CMD ["bash", "-lc", "set -eux; \
+  a2dismod mpm_event mpm_worker || true; \
+  rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* || true; \
+  a2enmod mpm_prefork; \
+  sed -ri \"s/^Listen .*/Listen ${PORT:-80}/\" /etc/apache2/ports.conf; \
+  sed -ri \"s/:80>/:${PORT:-80}>/\" /etc/apache2/sites-available/000-default.conf; \
+  apache2-foreground"]
