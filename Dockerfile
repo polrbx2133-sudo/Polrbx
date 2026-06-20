@@ -26,6 +26,13 @@ RUN touch /var/www/html/.env
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
+RUN { \
+    echo 'RewriteEngine On'; \
+    echo 'RewriteCond %{REQUEST_FILENAME} !-f'; \
+    echo 'RewriteCond %{REQUEST_FILENAME} !-d'; \
+    echo 'RewriteRule ^ index.php [L]'; \
+    } > /var/www/html/public/.htaccess
+
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
 RUN { \
