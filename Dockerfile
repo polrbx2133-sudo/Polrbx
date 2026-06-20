@@ -28,6 +28,9 @@ COPY . /var/www/html
 # Zainstaluj zależności PHP (bez dev-dependencies dla produkcji)
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Stwórz pusty plik .env - prawdziwe zmienne i tak biorą się z env. Railway (getenv())
+RUN touch /var/www/html/.env
+
 # Ustaw DocumentRoot na folder public/ (typowe dla tego typu projektów)
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
@@ -42,16 +45,6 @@ RUN { \
 # Uprawnienia dla storage/cache (jeśli projekt tego potrzebuje, jak Laravel-style apps)
 RUN chown -R www-data:www-data /var/www/html/storage 2>/dev/null || true
 
-# UWAGA: NIE podstawiamy $PORT tutaj (w RUN) — zmienna $PORT
-# istnieje tylko w środowisku Railway w trakcie RUNTIME, nie podczas build.
-# Podstawienie portu robimy w CMD poniżej.
-
 EXPOSE 80
 
-CMD ["bash", "-lc", "set -eux; \
-  a2dismod mpm_event mpm_worker || true; \
-  rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* || true; \
-  a2enmod mpm_prefork; \
-  sed -ri \"s/^Listen .*/Listen ${PORT:-80}/\" /etc/apache2/ports.conf; \
-  sed -ri \"s/:80>/:${PORT:-80}>/\" /etc/apache2/sites-available/000-default.conf; \
-  apache2-foreground"]
+CMD ["bash", "-lc", "set -eux; a2dismod mpm_event mpm_worker || true; rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* || true; a2enmod mpm_prefork; sed -ri \"s/Listen 80/Listen ${PORT:-80}/g\" /etc/apache2/ports.conf; sed -ri \"s/:80>/:${PORT:-80}>/g\" /etc/apache2/sites-available/000-default.conf; apache2-foreground"]
