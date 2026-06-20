@@ -28,6 +28,9 @@ spl_autoload_register(function ($class_name) {
 // I wonder if i should put all of this in a class 
 
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    if ($errno === E_DEPRECATED || $errno === E_USER_DEPRECATED || $errno === E_NOTICE || $errno === E_STRICT) {
+        return true;
+    }
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 });
 
